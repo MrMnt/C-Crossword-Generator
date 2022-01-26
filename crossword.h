@@ -6,6 +6,7 @@
 #define CROSSWORD_H
 
 #include "m_string.h"
+#include "m_io.h"
 
 struct Dictionary {
     String *wordArr;
@@ -14,15 +15,15 @@ struct Dictionary {
 typedef struct Dictionary Dictionary;
 
 struct Matrix {
-    String *rowArr;
+    char **grid;
     int width;
     int height;
 };
 typedef struct Matrix Matrix;
 
 struct Crossword {
-    Dictionary dictionary;
-    Matrix grid;
+    Dictionary *dictionary;
+    Matrix *matrix;
 };
 typedef struct Crossword Crossword;
 
@@ -30,5 +31,18 @@ typedef struct Crossword Crossword;
 void freeDictionary(Dictionary *dictionary);
 void freeMatrix(Matrix *matrix);
 void freeCrossWord(Crossword *crossword);
+
+
+Dictionary *createDictionary(FILE *fp);
+void setDictionary(Crossword *cd, Dictionary *d);
+void printDictionary(Dictionary *d);
+
+Matrix *createMatrix(FILE *fp);
+void setMatrix(Crossword *cd, Matrix *mt);
+void printMatrix(Matrix *mt);
+
+Crossword *createCrossword(FILE *dictionaryFp, FILE *matrixFp);
+
+
 
 #endif
