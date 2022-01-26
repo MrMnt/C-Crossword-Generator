@@ -21,7 +21,7 @@ void freeStringMembers(String *string){
 }
 
 void freeString(String *string){
-    free(string->s);
+    freeStringMembers(string);
     free(string);
     return;
 }
