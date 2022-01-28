@@ -8,37 +8,37 @@
 #include "crossword.h"
 
 Crossword *createCrossword(char *dictionaryFileName, char *matrixFileName){
-    Crossword *cd = calloc(1, sizeof(Crossword));
+    Crossword *cw = calloc(1, sizeof(Crossword));
     
     if(dictionaryFileName != NULL){
         FILE *dfp = openFile(dictionaryFileName, "r");
-        setDictionary(cd, createDictionaryFromFile(dfp));
+        setDictionary(cw, createDictionaryFromFile(dfp));
         fclose(dfp);
     }
 
     if(matrixFileName != NULL){
         FILE *mfp = openFile(matrixFileName, "r");
-        setMatrix(cd, createMatrixFromFile(mfp));
+        setMatrix(cw, createMatrixFromFile(mfp));
         fclose(mfp);
     }
 
-    return cd;
+    return cw;
 }
 
-void setDictionary(Crossword *cd, Dictionary *d){
-    if(cd->dictionary != NULL){
-        freeDictionary(cd->dictionary);
+void setDictionary(Crossword *cw, Dictionary *d){
+    if(cw->dictionary != NULL){
+        freeDictionary(cw->dictionary);
     }
 
-    cd->dictionary = d;
+    cw->dictionary = d;
 }
 
-void setMatrix(Crossword *cd, Matrix *mt){
-    if(cd->matrix != NULL){
-        freeMatrix(cd->matrix);
+void setMatrix(Crossword *cw, Matrix *mt){
+    if(cw->matrix != NULL){
+        freeMatrix(cw->matrix);
     }
     
-    cd->matrix = mt;
+    cw->matrix = mt;
 }
 
 Dictionary *createDictionaryFromFile(FILE *fp){

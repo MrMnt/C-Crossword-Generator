@@ -35,12 +35,12 @@ void freeCrossWord(Crossword *crossword);
 
 Dictionary *createDictionary(char **words, int dlen);
 Dictionary *createDictionaryFromFile(FILE *fp);
-void setDictionary(Crossword *cd, Dictionary *d);
+void setDictionary(Crossword *cw, Dictionary *d);
 void printDictionary(Dictionary *d);
 
 Matrix *createMatrix(char **grid, int height, int width);
 Matrix *createMatrixFromFile(FILE *fp);
-void setMatrix(Crossword *cd, Matrix *mt);
+void setMatrix(Crossword *cw, Matrix *mt);
 void printMatrix(Matrix *mt);
 
 Crossword *createCrossword(char *dictionaryFileName, char *matrixFileName);
