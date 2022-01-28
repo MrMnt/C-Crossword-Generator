@@ -33,11 +33,13 @@ void freeMatrix(Matrix *matrix);
 void freeCrossWord(Crossword *crossword);
 
 
-Dictionary *createDictionary(FILE *fp);
+Dictionary *createDictionary(char **words, int dlen);
+Dictionary *createDictionaryFromFile(FILE *fp);
 void setDictionary(Crossword *cd, Dictionary *d);
 void printDictionary(Dictionary *d);
 
-Matrix *createMatrix(FILE *fp);
+Matrix *createMatrix(char **grid, int height, int width);
+Matrix *createMatrixFromFile(FILE *fp);
 void setMatrix(Crossword *cd, Matrix *mt);
 void printMatrix(Matrix *mt);
 

@@ -4,13 +4,42 @@
 
 #include "crossword.h"
 
-int main(int argc, char *argv[]){
+void printSuccessMsg(char *msg);
 
-    Crossword *cd = createCrossword("test_1/dictionary.txt", "test_1/matrix.txt");
-    printDictionary(cd->dictionary);
-    putchar('\n');
-    printMatrix(cd->matrix);
+void test_1();
 
-    freeCrossWord(cd);
+int main(){
+
+    test_1();
+    printSuccessMsg("Test_1 Passed successfully");
+
     return 0;
+}
+
+void test_1(){
+    Crossword *cw = createCrossword(NULL, NULL);
+
+    char *words[] = { "kalnas", "namas", "vanduo", "dama", "rasa", "ola", "mia", "jis", };
+    Dictionary *d = createDictionary(words, 8);
+    setDictionary(cw, d);
+
+    char *grid[] = {
+        "101101", 
+        "000000", 
+        "101101", 
+        "100001", 
+        "101011", 
+        "100011", 
+    };
+    Matrix *mt = createMatrix(grid, 6, 6);
+    setMatrix(cw, mt);
+
+    printDictionary(cw->dictionary);
+    printMatrix(cw->matrix);
+
+    freeCrossWord(cw);
+}
+
+void printSuccessMsg(char *msg){
+    printf("[+] %s\n", msg);
 }

@@ -12,13 +12,13 @@ Crossword *createCrossword(char *dictionaryFileName, char *matrixFileName){
     
     if(dictionaryFileName != NULL){
         FILE *dfp = openFile(dictionaryFileName, "r");
-        setDictionary(cd, createDictionary(dfp));
+        setDictionary(cd, createDictionaryFromFile(dfp));
         fclose(dfp);
     }
 
     if(matrixFileName != NULL){
         FILE *mfp = openFile(matrixFileName, "r");
-        setMatrix(cd, createMatrix(mfp));
+        setMatrix(cd, createMatrixFromFile(mfp));
         fclose(mfp);
     }
 
@@ -41,7 +41,7 @@ void setMatrix(Crossword *cd, Matrix *mt){
     cd->matrix = mt;
 }
 
-Dictionary *createDictionary(FILE *fp){
+Dictionary *createDictionaryFromFile(FILE *fp){
     Dictionary *d = malloc(sizeof(Dictionary));
 
     d->len = getFileLineCount(fp);
@@ -56,13 +56,29 @@ Dictionary *createDictionary(FILE *fp){
     return d;
 }
 
+Dictionary *createDictionary(char **words, int dlen){
+    Dictionary *d = malloc(sizeof(Dictionary));
+
+    d->len = dlen;
+    d->wordArr = malloc(d->len * sizeof(String));
+
+    for(int i = 0; i < d->len; ++i){
+        String *tmpStr = createString(words[i]);
+        d->wordArr[i] = *tmpStr;
+        free(tmpStr);
+    }
+
+    return d;
+}
+
 void printDictionary(Dictionary *d){
     for(int i = 0; i < d->len; ++i){
         puts(d->wordArr[i].s);
     }
+    putchar('\n');
 }
 
-Matrix *createMatrix(FILE *fp){
+Matrix *createMatrixFromFile(FILE *fp){
     Matrix *mt = malloc(sizeof(Matrix));
 
     mt->height = getFileLineCount(fp);
@@ -77,6 +93,21 @@ Matrix *createMatrix(FILE *fp){
     return mt;
 }
 
+Matrix *createMatrix(char **grid, int height, int width){
+    Matrix *mt = malloc(sizeof(Matrix));
+
+    mt->height = height;
+    mt->width = width;
+
+    mt->grid = malloc(mt->height * sizeof(char *));
+    for(int i = 0; i < mt->height; ++i){
+        mt->grid[i] = malloc(sizeof(char) * (width + 1));
+        strcpy(mt->grid[i], grid[i]);
+    }
+
+    return mt;
+}
+
 void printMatrix(Matrix *mt){
     for(int y = 0; y < mt->height; ++y){
         for(int x = 0; x < mt->width; ++x){
@@ -84,6 +115,7 @@ void printMatrix(Matrix *mt){
         }
         putchar('\n');
     }
+    putchar('\n');
 }
 
 
