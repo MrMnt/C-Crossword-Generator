@@ -1,0 +1,12 @@
+# crossword_lib/CMakelists.txt
+
+add_library(crossword STATIC
+    crossword.c
+)
+
+target_link_libraries(crossword m_string)
+
+target_include_directories(crossword PUBLIC
+    ${CMAKE_SOURCE_DIR}/helper_lib
+    ${CMAKE_SOURCE_DIR}/string_lib
+)

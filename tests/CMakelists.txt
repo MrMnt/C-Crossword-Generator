@@ -1,0 +1,11 @@
+# tests/CMakelists.txt
+
+add_executable(tests tester.c)
+
+target_link_libraries(tests crossword)
+
+target_include_directories(tests PRIVATE 
+    ${CMAKE_SOURCE_DIR}/crossword_lib
+    # ${CMAKE_SOURCE_DIR}/helper_lib
+    # ${CMAKE_SOURCE_DIR}/string_lib
+)

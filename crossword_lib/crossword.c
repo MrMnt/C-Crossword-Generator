@@ -2,17 +2,25 @@
 // Student nr. 2110640
 // mantas.vadopalas@mif.stud.vu.lt
 
+// Include source file, to not have helper methods in final library
+// https://stackoverflow.com/questions/3016526/how-to-hide-helper-functions-from-public-api-in-c
+#include "m_helper.c"
 #include "crossword.h"
 
-
-Crossword *createCrossword(FILE *dictionaryFp, FILE *matrixFp){
+Crossword *createCrossword(char *dictionaryFileName, char *matrixFileName){
     Crossword *cd = calloc(1, sizeof(Crossword));
+    
+    if(dictionaryFileName != NULL){
+        FILE *dfp = openFile(dictionaryFileName, "r");
+        setDictionary(cd, createDictionary(dfp));
+        fclose(dfp);
+    }
 
-    if(dictionaryFp != NULL)
-        setDictionary(cd, createDictionary(dictionaryFp));
-
-    if(matrixFp != NULL)
-        setMatrix(cd, createMatrix(matrixFp));
+    if(matrixFileName != NULL){
+        FILE *mfp = openFile(matrixFileName, "r");
+        setMatrix(cd, createMatrix(mfp));
+        fclose(mfp);
+    }
 
     return cd;
 }

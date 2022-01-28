@@ -1,0 +1,29 @@
+Viename tekstiniame faile yra saugomas žodžių sąrašas, kitame - matrica, kurios elementai nuliai arba vienetai. Matricoje nuliai žymi tuščias pozicijas ("koridorius"), o vienetai - užimtas pozicijas ("sienas"). Matrica nusako kryžiažodžio struktūrą, bet ne turinį. Užduotis: parašykite programą, kuri moka korektiškai užpildyti (sudaryti) pateiktą kryžiažodį apsiribodama faile pateiktais žodžiais. Jeigu tai padaryti įmanoma (gali likti nepanaudotų žodžių, tačiau žodžiai negali kartotis ir negali likti "tuščių koridorių be žodžių"), reikia rezultatų faile pateikti užpildytą kryžiažodį (vieną iš galimų, jei jų yra daugiau); jeigu neįmanoma, reikia apie tai pranešti. Bet kuris dviejų (ar daugiau) iš eilės einančių raidžių (vertikaliai arba horizontaliai) junginys "žemėlapyje" laikytinas žodžiu, ir (dvi arba daugiau) greta esančias raides galima įrašyti tik tuomet, jei žodyne yra toks žodis, ir jei žodžiai kertasi korektiškai, t.y. žodžių susikirtimo vietose raidė sutampa.
+
+Žodžių sąrašo pavyzdys: 
+kalnas
+namas
+vanduo
+dama
+rasa
+ola
+mia
+jis
+
+Labirinto pavyzdys (galima kryžiažodžio struktūra):
+XOXXOX
+OOOOOO
+XOXXOX
+XOOOOX
+XOXOXX
+XOOOXX
+
+Galimo sprendinio pavyzdys (X čia pasirinktas kaip sienos žymeklis):
+XVXXRX
+KALNAS
+XNXXSX
+XDAMAX
+XUXIXX
+XOLAXX
+
+Negalima įkelti nesikompiliuojančio arba perspėjimus metančio kodo. Kode gali būti trūkumų, tačiau esminis funkcionalumas turi būti išpildytas, t.y. kryžiažodis turi būti užpildomas korektiškai. Vertinant, gali būti skiriami daliniai taškai, o sprendimo pateikimas reiškia pareigą jį pristatyti ir apginti.

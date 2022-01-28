@@ -6,7 +6,7 @@
 #define CROSSWORD_H
 
 #include "m_string.h"
-#include "m_io.h"
+#include "m_helper.h"
 
 struct Dictionary {
     String *wordArr;
@@ -41,8 +41,7 @@ Matrix *createMatrix(FILE *fp);
 void setMatrix(Crossword *cd, Matrix *mt);
 void printMatrix(Matrix *mt);
 
-Crossword *createCrossword(FILE *dictionaryFp, FILE *matrixFp);
-
+Crossword *createCrossword(char *dictionaryFileName, char *matrixFileName);
 
 
 #endif

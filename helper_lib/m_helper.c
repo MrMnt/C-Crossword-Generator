@@ -2,9 +2,9 @@
 // Student nr. 2110640
 // mantas.vadopalas@mif.stud.vu.lt
 
-#include "m_io.h"
+#include "m_helper.h"
 
-FILE *openFile(char *fileName, char *mode){
+static FILE *openFile(char *fileName, char *mode){
     FILE *file = fopen(fileName, mode);
 
     if(file == NULL){
@@ -15,7 +15,7 @@ FILE *openFile(char *fileName, char *mode){
     return file;
 }
 
-int getFileLength(FILE *fp){
+static int getFileLength(FILE *fp){
     int prevPos = ftell(fp);
 
     fseek(fp, 0, SEEK_END);
@@ -25,7 +25,7 @@ int getFileLength(FILE *fp){
     return len;
 }
 
-int getFileLineCount(FILE *fp){
+static int getFileLineCount(FILE *fp){
     int prevPos = ftell(fp);
     int count = 0;
     char c;
@@ -40,7 +40,7 @@ int getFileLineCount(FILE *fp){
     return count;
 }
 
-char *fgetLine(FILE *fp){
+static char *fgetLine(FILE *fp){
     char *line = malloc(sizeof(char) * (MAX_LINE_LENGTH + 1));
 
     fgets(line, MAX_LINE_LENGTH + 1, fp);

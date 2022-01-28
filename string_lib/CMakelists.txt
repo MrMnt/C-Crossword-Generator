@@ -1,0 +1,8 @@
+# string_lib/CMakelists.txt
+
+cmake_minimum_required(VERSION 3.22.2)
+project(m_string)
+
+add_library(m_string STATIC 
+    m_string.c
+)
