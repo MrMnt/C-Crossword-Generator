@@ -5,8 +5,12 @@
 #ifndef CROSSWORD_H
 #define CROSSWORD_H
 
+#include <ctype.h>
 #include "m_string.h"
 #include "m_helper.h"
+
+#define EMPTY_CELL '0'
+#define WALL_CELL '1'
 
 struct Dictionary {
     String *wordArr;
@@ -42,8 +46,11 @@ Matrix *createMatrix(char **grid, int height, int width);
 Matrix *createMatrixFromFile(FILE *fp);
 void setMatrix(Crossword *cw, Matrix *mt);
 void printMatrix(Matrix *mt);
+void printMatrixPretty(Matrix *mt);
+void fprintMatrixPretty(Matrix *mt, FILE *fp);
 
 Crossword *createCrossword(char *dictionaryFileName, char *matrixFileName);
+int fillCrossword(Crossword *cw);
 
 
 #endif

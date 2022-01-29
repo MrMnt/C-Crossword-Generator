@@ -12,10 +12,11 @@
 #define MAX_LINE_LENGTH 64
 #define MAX_FILE_NAME_LENGTH 36
 
+#define TRUE 1
+#define FALSE 0
 
 static FILE *openFile(char *fileName, char *mode);
-static int getFileLength(FILE *fp);
-static int getFileLineCount(FILE *fp);
+static int getFileLineCountTillEmptyLine(FILE *fp);
 
 static char *fgetLine(FILE *fp);
 

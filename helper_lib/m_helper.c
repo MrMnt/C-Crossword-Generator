@@ -15,33 +15,27 @@ static FILE *openFile(char *fileName, char *mode){
     return file;
 }
 
-static int getFileLength(FILE *fp){
-    int prevPos = ftell(fp);
-
-    fseek(fp, 0, SEEK_END);
-    int len = ftell(fp);
-
-    fseek(fp, prevPos, SEEK_SET);
-    return len;
-}
-
-static int getFileLineCount(FILE *fp){
+static int getFileLineCountTillEmptyLine(FILE *fp){
     int prevPos = ftell(fp);
     int count = 0;
     char c;
     
-    do {
-        fscanf(fp, "%*[^\n]");
-        c = getc(fp);
+    char *str = fgetLine(fp);
+    while(strlen(str) != 0){
+        free(str);
         count += 1;
-    } while(c != EOF);
+        if(feof(fp)){
+            break;
+        }
+        str = fgetLine(fp);
+    }
 
     fseek(fp, prevPos, SEEK_SET);
     return count;
 }
 
 static char *fgetLine(FILE *fp){
-    char *line = malloc(sizeof(char) * (MAX_LINE_LENGTH + 1));
+    char *line = calloc(sizeof(char) , (MAX_LINE_LENGTH + 1));
 
     fgets(line, MAX_LINE_LENGTH + 1, fp);
     line[strcspn(line, "\n")] = '\0';
