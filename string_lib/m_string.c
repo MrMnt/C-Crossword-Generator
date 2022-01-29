@@ -4,7 +4,7 @@
 
 #include "m_string.h"
 
-String *createString(char *str){
+String* createString(char *str){
     String *string = malloc(sizeof(String));
 
     if(str != NULL){

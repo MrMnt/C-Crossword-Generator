@@ -6,8 +6,8 @@
 #define CROSSWORD_H
 
 #include <ctype.h>
+#include <stdio.h>
 #include "m_string.h"
-#include "m_helper.h"
 
 #define EMPTY_CELL '0'
 #define WALL_CELL '1'
