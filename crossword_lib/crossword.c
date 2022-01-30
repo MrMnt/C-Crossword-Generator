@@ -6,9 +6,11 @@
 // https://stackoverflow.com/questions/3016526/how-to-hide-helper-functions-from-public-api-in-c
 #include "m_helper.c"
 #include "crossword.h"
+#include "m_timer.c"
 
 // Helper methods for solving purposes. 
-static int solveCrossword(Dictionary *d, Matrix *mt, int wordIndex);
+static int solveCrossword(Dictionary *d, Matrix *mt, int wordIndex, int *stRows, int *stCols, int startingPosLen);
+
 static int isFilled(Matrix *mt);
 static Matrix *createBackupMatrix(Matrix *mt);
 static void loadBackupMatrix(Matrix *mt, Matrix *backupMatrix);
@@ -21,10 +23,46 @@ static int isBottomCellOccupied(String word, Matrix *mt, int row, int col);
 static int isOkayToAssignCell(char newValue, Matrix *mt, int row, int col);
 static int findSpotForWordHorizontally(String word, Matrix *mt, int *row_, int *col_);
 static int findSpotForWordVertically(String word, Matrix *mt, int *row_, int *col_);
-static int solveCrossword2(Dictionary *d, Matrix *mt, int wordIndex);
+static int wordCanBePlacedVertically(String word, Matrix *mt, int row, int col);
+static int wordCanBePlacedHorizontally(String word, Matrix *mt, int row, int col);
+static int findAllPossibleStartingPositions(Matrix *mt, int **stRows, int **stCols);
+
+
+#define SHOW_PROGRESS 
+
+#ifdef SHOW_PROGRESS
+#define NUMBER_OF_CALLS_BEOFRE_SHOW_PROGRESS 1000000
+static void showProgress(Matrix *mt);
+
+long int CALL_COUNT = 0;
+Timer *mTimer;
+static void printCount(Matrix *mt){
+    if(CALL_COUNT++ % NUMBER_OF_CALLS_BEOFRE_SHOW_PROGRESS == 0){
+        setEndTime(mTimer);
+
+        printf("-------------------------------\n");
+        printf("%lf s for %d calls\n", getDuration(mTimer), NUMBER_OF_CALLS_BEOFRE_SHOW_PROGRESS);
+        printf("Total number of calls to solveCrossword() = %g\n", (double) CALL_COUNT);
+        printMatrixPretty(mt);
+
+        setStartTime(mTimer);
+    }
+}
+#endif
 
 int fillCrossword(Crossword *cw){
-    return solveCrossword2(cw->dictionary, cw->matrix, 0);
+    int *stRows, *stCols;
+    int startingPosArrLen = findAllPossibleStartingPositions(cw->matrix, &stRows, &stCols);
+
+#ifdef SHOW_PROGRESS
+    mTimer = getTimer();
+#endif
+    int solved = solveCrossword(cw->dictionary, cw->matrix, 0, stRows, stCols, startingPosArrLen);
+
+    free(stRows);
+    free(stCols);
+
+    return solved;
 }
 
 Crossword *createCrossword(char *dictionaryFileName, char *matrixFileName){
@@ -171,6 +209,7 @@ void fprintMatrixPretty(Matrix *mt, FILE *fp){
 void freeDictionary(Dictionary *d){
     freeStringArray(d->wordArr, d->len);
     free(d);
+    d = NULL;
 }
 
 void freeMatrix(Matrix *mt){
@@ -179,12 +218,14 @@ void freeMatrix(Matrix *mt){
     }
     free(mt->grid);
     free(mt);
+    mt = NULL;
 }
 
 void freeCrossWord(Crossword *crossword){
     freeDictionary(crossword->dictionary);
     freeMatrix(crossword->matrix);
     free(crossword);
+    crossword = NULL;
 }
 
 static int isFilled(Matrix *mt){
@@ -203,7 +244,7 @@ static Matrix *createBackupMatrix(Matrix *mt){
 
 static void loadBackupMatrix(Matrix *mt, Matrix *backupMatrix){
     for(int i = 0; i < mt->height; ++i){
-        strcpy(mt->grid[i], backupMatrix->grid[i]);
+        memcpy(mt->grid[i], backupMatrix->grid[i], sizeof(char) * mt->width);
     }
 }
 
@@ -268,205 +309,128 @@ static int isOkayToAssignCell(char newValue, Matrix *mt, int row, int col){
     return TRUE;
 }
 
-static int findSpotForWordHorizontally(String word, Matrix *mt, int *row_, int *col_){
+static int wordCanBePlacedVertically(String word, Matrix *mt, int row, int col){
 
-    for(int row = *row_; row < mt->height; ++row){
-        for(int col = *col_; col < mt->width; ++col){
+    // Make sure word fits
+    if(row + word.len > mt->height) 
+        return FALSE;
 
-            if(col + word.len > mt->width) 
-                break;
+    // Check again, because maybe other word has already put a letter here
+    if(!isOkayToAssignCell(word.s[0], mt, row, col)) 
+        return FALSE;
+    
+    if(!isTopCellOccupied(mt, row, col))
+        return FALSE;
 
-            if(!isOkayToAssignCell(word.s[0], mt, row, col)) 
-                continue;
+    // Make sure after the word ends, no other can start
+    if(!isBottomCellOccupied(word, mt, row, col)) 
+        return FALSE;
 
-            if(!isLeftCellOccupied(mt, row, col)) 
-                continue;
-                
-            if(!isRightCellOccupied(word, mt, row, col)) 
-                continue;
-
-            int isOkay = TRUE;
-            for(int i = 1; i < word.len; ++i){
-                if(!isOkayToAssignCell(word.s[i], mt, row, col + i)){
-                    isOkay = FALSE;
-                    break;
-                }
-            }
-
-            if(isOkay){
-                *row_ = row;
-                *col_ = col;
-                return TRUE;
-            }
+    // Make sure there are no conflicts in between
+    for(int i = 1; i < word.len; ++i){
+        if(!isOkayToAssignCell(word.s[i], mt, row + i, col)){
+            return FALSE;
         }
     }
 
-    return FALSE;
+    return TRUE;
 }
 
-static int findSpotForWordVertically(String word, Matrix *mt, int *row_, int *col_){
+static int wordCanBePlacedHorizontally(String word, Matrix *mt, int row, int col){
 
-    for(int row = *row_; row < mt->height; ++row){
+    // Make sure word fits
+    if(col + word.len > mt->width) 
+        return FALSE;
 
-        if(row + word.len > mt->height)
-            break;
+    // Check again, because maybe other word has already put a letter here
+    if(!isOkayToAssignCell(word.s[0], mt, row, col)) 
+        return FALSE;
 
-        for(int col = *col_; col < mt->width; ++col){
+    if(!isLeftCellOccupied(mt, row, col))
+        return FALSE;
 
-            if(!isOkayToAssignCell(word.s[0], mt, row, col))
-                continue;
+    // Make sure after the word ends, no other can start
+    if(!isRightCellOccupied(word, mt, row, col)) 
+        return FALSE;
 
-            if(!isTopCellOccupied(mt, row, col))
-                continue;
-
-            if(!isBottomCellOccupied(word, mt, row, col))
-                continue;
-
-            int isOkay = TRUE;
-            for(int i = 1; i < word.len; ++i){
-                if(!isOkayToAssignCell(word.s[i], mt, row + i, col)){
-                    isOkay = FALSE;
-                    break;
-                }
-            }
-
-            if(isOkay){
-                *row_ = row;
-                *col_ = col;
-                return TRUE;
-            }
+    // Make sure there are no conflicts in between
+    for(int i = 1; i < word.len; ++i){
+        if(!isOkayToAssignCell(word.s[i], mt, row, col + i)){
+            return FALSE;
         }
     }
 
-    return FALSE;
+    return TRUE;
 }
 
-static int solveCrossword2(Dictionary *d, Matrix *mt, int wordIndex){
+static int findAllPossibleStartingPositions(Matrix *mt, int **stRows, int **stCols){
+    *stRows = malloc(sizeof(int) * mt->height * mt->width);
+    *stCols = malloc(sizeof(int) * mt->height * mt->width);
+    int startingPosArrLen = 0;
+
+    for(int row = 0; row < mt->height; ++row){
+        for(int col = 0; col < mt->width; ++col){
+            if(!isOkayToAssignCell(' ', mt, row, col))
+                continue;
+
+            // if word COULD start here
+            if(isLeftCellOccupied(mt, row, col) || isTopCellOccupied(mt, row, col)){
+                (*stRows)[startingPosArrLen] = row;
+                (*stCols)[startingPosArrLen] = col;
+                startingPosArrLen += 1;
+            }
+
+        }
+    }
+
+    *stRows = realloc(*stRows, sizeof(int) * startingPosArrLen);
+    *stCols = realloc(*stCols, sizeof(int) * startingPosArrLen);
+
+    return startingPosArrLen;
+}
+
+
+static int solveCrossword(Dictionary *d, Matrix *mt, int wordIndex, int *stRows, int *stCols, int startingPosLen){
+    #ifdef SHOW_PROGRESS
+        printCount(mt);
+    #endif
+
     if(isFilled(mt))
         return TRUE;
 
+    Matrix *backupMatrix = createBackupMatrix(mt);
     for(int i = wordIndex; i < d->len; ++i){
         String word = d->wordArr[i];
-        Matrix *backupMatrix = createBackupMatrix(mt);
 
-        // ---------------- HORIZONTAL ----------------------------
-        for(int row = 0; row < mt->height; ++row){
-            for(int col = 0; col < mt->width; ++col){
-
-                if(col + word.len > mt->width) 
-                    break;
-
-                if(!isOkayToAssignCell(word.s[0], mt, row, col)) 
-                    continue;
-
-                if(!isLeftCellOccupied(mt, row, col)) 
-                    continue;
-                    
-                if(!isRightCellOccupied(word, mt, row, col)) 
-                    continue;
-
-                int isOkay = TRUE;
-                for(int i = 1; i < word.len; ++i){
-                    if(!isOkayToAssignCell(word.s[i], mt, row, col + i)){
-                        isOkay = FALSE;
-                        break;
-                    }
+        // For every (potential) possible starting location
+        // Try solving it
+        for(int pos = 0; pos < startingPosLen; ++pos){
+            int row = stRows[pos];
+            int col = stCols[pos];
+            
+            // ----------------- HORIZONTAL --------------------
+            if(wordCanBePlacedHorizontally(word, mt, row, col)){
+                putWordHorizontally(word, mt, row, col);
+                if(solveCrossword(d, mt, i + 1, stRows, stCols, startingPosLen) == TRUE){
+                    return TRUE;
+                } else {
+                    loadBackupMatrix(mt, backupMatrix);
                 }
+            }
 
-                if(isOkay){
-                    putWordHorizontally(word, mt, row, col);
-
-                    if(solveCrossword2(d, mt, i + 1) == TRUE){
-                        return TRUE;
-                    } else {
-                        loadBackupMatrix(mt, backupMatrix);
-                    }
+            // ----------------- VERTICAL --------------------
+            if(wordCanBePlacedVertically(word, mt, row, col)){
+                putWordVertically(word, mt, row, col);
+                if(solveCrossword(d, mt, i + 1, stRows, stCols, startingPosLen) == TRUE){
+                    return TRUE;
+                } else {
+                    loadBackupMatrix(mt, backupMatrix);
                 }
             }
         }
-        // ---------------- HORIZONTAL ----------------------------
 
-
-
-        // ---------------- VERTICAL ----------------------------
-        for(int row = 0; row < mt->height; ++row){
-            for(int col = 0; col < mt->width; ++col){
-
-                if(row + word.len > mt->height){
-                    col = 0;
-                    break;
-                }
-
-                if(!isOkayToAssignCell(word.s[0], mt, row, col)) 
-                    continue;
-
-                if(!isTopCellOccupied(mt, row, col)) 
-                    continue;
-                    
-                if(!isBottomCellOccupied(word, mt, row, col)) 
-                    continue;
-
-                int isOkay = TRUE;
-                for(int i = 1; i < word.len; ++i){
-                    if(!isOkayToAssignCell(word.s[i], mt, row + i, col)){
-                        isOkay = FALSE;
-                        break;
-                    }
-                }
-
-                if(isOkay){
-                    putWordVertically(word, mt, row, col);
-
-                    if(solveCrossword2(d, mt, i + 1) == TRUE){
-                        return TRUE;
-                    } else {
-                        loadBackupMatrix(mt, backupMatrix);
-                    }
-                }
-            }
-        }
-        // ---------------- VERTICAL ----------------------------
-
-        freeMatrix(backupMatrix);
     }
 
-    return FALSE;
-}
-
-static int solveCrossword(Dictionary *d, Matrix *mt, int wordIndex){
-    if(isFilled(mt))
-        return TRUE;
-
-    for(int i = wordIndex; i < d->len; ++i){
-        String word = d->wordArr[i];
-        Matrix *backupMatrix = createBackupMatrix(mt);
-
-        int row = 0, col = 0; 
-        while(findSpotForWordHorizontally(word, mt, &row, &col)){
-            putWordHorizontally(word, mt, row, col);
-
-            if(solveCrossword(d, mt, i + 1) == TRUE){
-                return TRUE;
-            } else {
-                loadBackupMatrix(mt, backupMatrix);
-            }
-
-        }
-
-        row = 0, col = 0;
-        while(findSpotForWordVertically(word, mt, &row, &col)){
-            putWordVertically(word, mt, row, col);
-
-            if(solveCrossword(d, mt, i + 1) == TRUE){
-                return TRUE;
-            } else {
-                loadBackupMatrix(mt, backupMatrix);
-            }
-
-        }
-
-        freeMatrix(backupMatrix);
-    }
-
+    freeMatrix(backupMatrix);
     return FALSE;
 }
