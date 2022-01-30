@@ -47,7 +47,7 @@ static int getFileLineCountTillEmptyLine(FILE *fp){
 }
 
 static char *fgetLine(FILE *fp){
-    char *line = malloc((MAX_LINE_LENGTH + 1) * sizeof(char));
+    char *line = calloc((MAX_LINE_LENGTH + 1), sizeof(char));
 
     fgets(line, MAX_LINE_LENGTH + 1, fp);
     line[strcspn(line, "\n")] = '\0';

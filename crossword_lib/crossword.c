@@ -21,10 +21,10 @@ static int isBottomCellOccupied(String word, Matrix *mt, int row, int col);
 static int isOkayToAssignCell(char newValue, Matrix *mt, int row, int col);
 static int findSpotForWordHorizontally(String word, Matrix *mt, int *row_, int *col_);
 static int findSpotForWordVertically(String word, Matrix *mt, int *row_, int *col_);
-static int solveCrossword(Dictionary *d, Matrix *mt, int wordIndex);
+static int solveCrossword2(Dictionary *d, Matrix *mt, int wordIndex);
 
 int fillCrossword(Crossword *cw){
-    return solveCrossword(cw->dictionary, cw->matrix, 0);
+    return solveCrossword2(cw->dictionary, cw->matrix, 0);
 }
 
 Crossword *createCrossword(char *dictionaryFileName, char *matrixFileName){
@@ -341,6 +341,98 @@ static int findSpotForWordVertically(String word, Matrix *mt, int *row_, int *co
     return FALSE;
 }
 
+static int solveCrossword2(Dictionary *d, Matrix *mt, int wordIndex){
+    if(isFilled(mt))
+        return TRUE;
+
+    for(int i = wordIndex; i < d->len; ++i){
+        String word = d->wordArr[i];
+        Matrix *backupMatrix = createBackupMatrix(mt);
+
+        // ---------------- HORIZONTAL ----------------------------
+        for(int row = 0; row < mt->height; ++row){
+            for(int col = 0; col < mt->width; ++col){
+
+                if(col + word.len > mt->width) 
+                    break;
+
+                if(!isOkayToAssignCell(word.s[0], mt, row, col)) 
+                    continue;
+
+                if(!isLeftCellOccupied(mt, row, col)) 
+                    continue;
+                    
+                if(!isRightCellOccupied(word, mt, row, col)) 
+                    continue;
+
+                int isOkay = TRUE;
+                for(int i = 1; i < word.len; ++i){
+                    if(!isOkayToAssignCell(word.s[i], mt, row, col + i)){
+                        isOkay = FALSE;
+                        break;
+                    }
+                }
+
+                if(isOkay){
+                    putWordHorizontally(word, mt, row, col);
+
+                    if(solveCrossword2(d, mt, i + 1) == TRUE){
+                        return TRUE;
+                    } else {
+                        loadBackupMatrix(mt, backupMatrix);
+                    }
+                }
+            }
+        }
+        // ---------------- HORIZONTAL ----------------------------
+
+
+
+        // ---------------- VERTICAL ----------------------------
+        for(int row = 0; row < mt->height; ++row){
+            for(int col = 0; col < mt->width; ++col){
+
+                if(row + word.len > mt->height){
+                    col = 0;
+                    break;
+                }
+
+                if(!isOkayToAssignCell(word.s[0], mt, row, col)) 
+                    continue;
+
+                if(!isTopCellOccupied(mt, row, col)) 
+                    continue;
+                    
+                if(!isBottomCellOccupied(word, mt, row, col)) 
+                    continue;
+
+                int isOkay = TRUE;
+                for(int i = 1; i < word.len; ++i){
+                    if(!isOkayToAssignCell(word.s[i], mt, row + i, col)){
+                        isOkay = FALSE;
+                        break;
+                    }
+                }
+
+                if(isOkay){
+                    putWordVertically(word, mt, row, col);
+
+                    if(solveCrossword2(d, mt, i + 1) == TRUE){
+                        return TRUE;
+                    } else {
+                        loadBackupMatrix(mt, backupMatrix);
+                    }
+                }
+            }
+        }
+        // ---------------- VERTICAL ----------------------------
+
+        freeMatrix(backupMatrix);
+    }
+
+    return FALSE;
+}
+
 static int solveCrossword(Dictionary *d, Matrix *mt, int wordIndex){
     if(isFilled(mt))
         return TRUE;
@@ -357,7 +449,6 @@ static int solveCrossword(Dictionary *d, Matrix *mt, int wordIndex){
                 return TRUE;
             } else {
                 loadBackupMatrix(mt, backupMatrix);
-                col += 1;
             }
 
         }
@@ -370,7 +461,6 @@ static int solveCrossword(Dictionary *d, Matrix *mt, int wordIndex){
                 return TRUE;
             } else {
                 loadBackupMatrix(mt, backupMatrix);
-                col += 1;
             }
 
         }
