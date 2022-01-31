@@ -16,19 +16,18 @@ String* createString(char *str){
     return string;
 }
 
-void freeStringMembers(String *string){
-    free(string->s);
-}
-
 void freeString(String *string){
-    freeStringMembers(string);
+    free(string->s);
     free(string);
+    string = NULL;
     return;
 }
 
 void freeStringArray(String *stringArr, int n){
     for(int i = 0; i < n; ++i){
-        freeStringMembers(stringArr + i);
+        free(stringArr[i].s);
     }
+
     free(stringArr);
+    stringArr = NULL;
 }

@@ -8,6 +8,8 @@
 #include "crossword.h"
 #include "m_timer.c"
 
+
+
 // Helper methods for solving purposes. 
 static int solveCrossword(Dictionary *d, Matrix *mt, int wordIndex, int *stRows, int *stCols, int startingPosLen);
 
@@ -21,11 +23,10 @@ static int isTopCellOccupied(Matrix *mt, int row, int col);
 static int isRightCellOccupied(String word, Matrix *mt, int row, int col);
 static int isBottomCellOccupied(String word, Matrix *mt, int row, int col);
 static int isOkayToAssignCell(char newValue, Matrix *mt, int row, int col);
-static int findSpotForWordHorizontally(String word, Matrix *mt, int *row_, int *col_);
-static int findSpotForWordVertically(String word, Matrix *mt, int *row_, int *col_);
 static int wordCanBePlacedVertically(String word, Matrix *mt, int row, int col);
 static int wordCanBePlacedHorizontally(String word, Matrix *mt, int row, int col);
 static int findAllPossibleStartingPositions(Matrix *mt, int **stRows, int **stCols);
+
 
 
 #define SHOW_PROGRESS 
@@ -69,15 +70,11 @@ Crossword *createCrossword(char *dictionaryFileName, char *matrixFileName){
     Crossword *cw = calloc(1, sizeof(Crossword));
     
     if(dictionaryFileName != NULL){
-        FILE *dfp = openFile(dictionaryFileName, "r");
-        setDictionary(cw, createDictionaryFromFile(dfp));
-        fclose(dfp);
+        setDictionary(cw, createDictionaryFromFile(dictionaryFileName));
     }
 
     if(matrixFileName != NULL){
-        FILE *mfp = openFile(matrixFileName, "r");
-        setMatrix(cw, createMatrixFromFile(mfp));
-        fclose(mfp);
+        setMatrix(cw, createMatrixFromFile(matrixFileName));
     }
 
     return cw;
@@ -99,18 +96,24 @@ void setMatrix(Crossword *cw, Matrix *mt){
     cw->matrix = mt;
 }
 
-Dictionary *createDictionaryFromFile(FILE *fp){
+
+Dictionary *createDictionaryFromFile(char * dictionaryFileName){
+    if(dictionaryFileName == NULL)
+        return NULL;
+
+    FILE *dfp = openFile(dictionaryFileName, "r");
     Dictionary *d = malloc(sizeof(Dictionary));
 
-    d->len = getFileLineCountTillEmptyLine(fp);
+    d->len = getFileLineCountTillEmptyLine(dfp);
     d->wordArr = malloc(d->len * sizeof(String));
 
     for(int i = 0; i < d->len; ++i){
-        String *tmpStr = createString(fgetLine(fp));
+        String *tmpStr = createString(fgetLine(dfp));
         d->wordArr[i] = *tmpStr;
         free(tmpStr);
     }
 
+    fclose(dfp);
     return d;
 }
 
@@ -136,18 +139,23 @@ void printDictionary(Dictionary *d){
     putchar('\n');
 }
 
-Matrix *createMatrixFromFile(FILE *fp){
+Matrix *createMatrixFromFile(char *matrixFileName){
+    if(matrixFileName == NULL)
+        return NULL;
+
+    FILE *mfp = openFile(matrixFileName, "r");
     Matrix *mt = malloc(sizeof(Matrix));
 
-    mt->height = getFileLineCountTillEmptyLine(fp);
-    mt->width = strlen(fgetLine(fp));
-    fseek(fp, 0l, SEEK_SET);
+    mt->height = getFileLineCountTillEmptyLine(mfp);
+    mt->width = strlen(fgetLine(mfp));
+    fseek(mfp, 0l, SEEK_SET);
 
     mt->grid = malloc(mt->height * sizeof(char *));
     for(int i = 0; i < mt->height; ++i){
-        mt->grid[i] = fgetLine(fp);
+        mt->grid[i] = fgetLine(mfp);
     }
 
+    fclose(mfp);
     return mt;
 }
 
@@ -221,7 +229,7 @@ void freeMatrix(Matrix *mt){
     mt = NULL;
 }
 
-void freeCrossWord(Crossword *crossword){
+void freeCrossword(Crossword *crossword){
     freeDictionary(crossword->dictionary);
     freeMatrix(crossword->matrix);
     free(crossword);

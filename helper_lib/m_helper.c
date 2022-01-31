@@ -21,7 +21,7 @@ static FILE *openFile(char *fileName, char *mode){
 
     if(file == NULL){
         printf("Problem while opening file named \"%s\"\n", fileName);
-        exit(-1);
+        // exit(-1);
     }
 
     return file;

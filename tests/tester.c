@@ -13,10 +13,10 @@ void test_4();
 
 int main(){
 
-    test_1();
-    test_2();
-    test_3();
-    test_4(); // Arranged for BEST scenario
+    // test_1();
+    // test_2();
+    // test_3();
+    // test_4(); // Arranged for BEST scenario
 
     return 0;
 }
@@ -50,7 +50,7 @@ void test_1(){
 
     fillCrossword(cw);
     printMatrixPretty(cw->matrix);
-    freeCrossWord(cw);
+    freeCrossword(cw);
 }
 
 void test_2(){
@@ -77,7 +77,7 @@ void test_2(){
 
     fillCrossword(cw);
     printMatrixPretty(cw->matrix);
-    freeCrossWord(cw);
+    freeCrossword(cw);
 }
 
 void test_3(){
@@ -102,7 +102,7 @@ void test_3(){
 
     fillCrossword(cw);
     printMatrixPretty(cw->matrix);
-    freeCrossWord(cw);
+    freeCrossword(cw);
 }
 
 void test_4(){
@@ -155,7 +155,7 @@ void test_4(){
 
     fillCrossword(cw);
     printMatrixPretty(cw->matrix);
-    freeCrossWord(cw);
+    freeCrossword(cw);
 }
 
 void printSuccessMsg(char *msg){
