@@ -58,21 +58,22 @@ typedef struct {
  * @returns Pointer to the created Crossword
  * 
  * @note @p dictionaryFileName and @p matrixFileName values may be NULL.
- * @see createDictionaryFromFile() and createMatrixFromFile()
+ * @see createDictionaryFromFile(), createMatrixFromFile()
  */
 Crossword *createCrossword(char *dictionaryFileName, char *matrixFileName);
 
 /** Creates a dictionary from a text file
  *
- * File requirments:
- *   * Should start with the word list (no empty lines before)
+ * Dictionary file requirments:
+ *   * Cannot start with an empty line
  *   * Each word is written on a seperate line
  *   * No spaces (if space is not considered part of a word)
+ *   * All words must be uppercase or lowercase
  * 
  * Parsing stops after encountering the first empty line or end of file is reached.
  * 
  * Example:
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ .txt
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.txt
  * FIRST
  * WORD
  * THIRD
@@ -86,19 +87,21 @@ Crossword *createCrossword(char *dictionaryFileName, char *matrixFileName);
  * 
  * @returns Pointer to the created Dictionary. Otherwise, NULL
  * 
+ * @see createDictionary()
  */
 Dictionary *createDictionaryFromFile(char * dictionaryFileName);
 
 /** Creates a matrix from a text file
  * 
- * File requirments:
- *   * Should start with the matrix (no empty lines before)
+ * Matrix file requirments:
+ *   * Cannot start with an empty line
  *   * Each row is written on a seperate line
  *   * Should use #EMPTY_CELL or #WALL_CELL values 
  * 
  * Parsing stops after encountering the first empty line or end of file is reached.
+ * 
  * Example:
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ .txt
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.txt
  * 1101111
  * 1101111
  * 0000011
@@ -114,6 +117,8 @@ Dictionary *createDictionaryFromFile(char * dictionaryFileName);
  * @note If file can't be found or opened, it is noted in standart output.
  * 
  * @returns Pointer to the created Matrix. Otherwise, NULL
+ * 
+ * @see createMatrix()
  */
 Matrix *createMatrixFromFile(char *matrixFileName);
 
@@ -124,10 +129,11 @@ Matrix *createMatrixFromFile(char *matrixFileName);
  * @param words - array of C strings
  * @param dlen - dictionary length
  * 
- * @warning Expects @p words nog to be NULL
+ * @warning Expects @p words not to be NULL
  * 
  * @returns Pointer to the created Dictionary
  * 
+ * @see createDictionaryFromFile()
  */
 Dictionary *createDictionary(char **words, int dlen);
 
@@ -141,6 +147,7 @@ Dictionary *createDictionary(char **words, int dlen);
  * 
  * @returns Pointer to the created Matrix
  * 
+ * @see createMatrixFromFile()
  */
 Matrix *createMatrix(char **grid, int height, int width);
 
@@ -148,7 +155,7 @@ Matrix *createMatrix(char **grid, int height, int width);
 
 /** Finds a possible solution to the crossword
  * 
- * Tries to fill the crossword @p matrix with the words from the @p dictionary
+ * Tries to fill the crossword @p Matrix with words from the @p Dictionary
  * 
  * @param cw - pointer to the Crossword which will be solved
  * 
@@ -166,6 +173,8 @@ int fillCrossword(Crossword *cw);
  * 
  * @note Previous dictionary will automatically be deallocated
  * 
+ * @see createDictionary(), createDictionaryFromFile()
+ * 
  */
 void setDictionary(Crossword *cw, Dictionary *d);
 
@@ -175,6 +184,8 @@ void setDictionary(Crossword *cw, Dictionary *d);
  * @param mt - pointer to the new Matrix
  * 
  * @note Previous matrix will automatically be deallocated
+ * 
+ * @see createMatrix(), createMatrixFromFile()
  * 
  */
 void setMatrix(Crossword *cw, Matrix *mt);
@@ -188,16 +199,19 @@ void printDictionary(Dictionary *d);
 
 /** Prints matrix grid as is to standart output
  * @param mt - pointer to Matrix
+ * @see printMatrixPretty(), fprintMatrixPretty()
  */
 void printMatrix(Matrix *mt);
 
 /** Prints formatted matrix grid to standart output
  * @param mt - pointer to Matrix
+ * @see printMatrix(), fprintMatrixPretty()
  */
 void printMatrixPretty(Matrix *mt);
 
 /** Prints formatted matrix grid to file
  * @param mt - pointer to Matrix
+ * @see printMatrix(), printMatrixPretty()
  */
 void fprintMatrixPretty(Matrix *mt, FILE *fp);
 
@@ -206,18 +220,21 @@ void fprintMatrixPretty(Matrix *mt, FILE *fp);
 /** Deallocates memory used by @p crossword
  * @param crossword - pointer to Crossword that will be deallocated
  * @note @p crossword will be set to NULL
+ * @see freeDictionary(), freeMatrix()
  */
 void freeCrossword(Crossword *crossword);
 
 /** Deallocates memory used by @p dictionary
  * @param dictionary - pointer to Dictionary that will be deallocated
  * @note @p dictionary will be set to NULL
+ * @see freeCrossword(), freeMatrix()
  */
 void freeDictionary(Dictionary *dictionary);
 
 /** Deallocates memory used by @p matrix
  * @param matrix - pointer to Matrix that will be deallocated
  * @note @p matrix will be set to NULL
+ * @see freeCrossword(), freeDictionary()
  */
 void freeMatrix(Matrix *matrix);
 
