@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['s_0',['s',['../struct_string.html#ab51cd24d34f6509eafb5e059f4c7d10e',1,'String']]],
-  ['start_5ft_1',['start_t',['../struct_timer.html#ab162dafab314b773b5956bcc76564d7f',1,'Timer']]]
+  ['width_0',['width',['../struct_matrix.html#a2474a5474cbff19523a51eb1de01cda4',1,'Matrix']]],
+  ['wordarr_1',['wordArr',['../struct_dictionary.html#abcd3f7ba6a7aaedd23eee54a91a30b8f',1,'Dictionary']]]
 ];

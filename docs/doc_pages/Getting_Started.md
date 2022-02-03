@@ -1,6 +1,14 @@
 @page Getting_Started Getting Started Guide
 @tableofcontents
 
+@section getting_started_s0 Includes
+To use the library include `crossword.h` and `m_string.h` files. 
+
+If both files are in the same directory, you only need to include `crossword.h`.
+~~~~~~~~~~~~~~~.c
+#include "crossword.h"
+~~~~~~~~~~~~~~~
+
 @section getting_started_s1 Crossword Initialization
 
 To create a crossword there are two options:

@@ -9,5 +9,4 @@ target_link_libraries(crossword m_string)
 target_include_directories(crossword PUBLIC
     ${CMAKE_SOURCE_DIR}/helper_lib
     ${CMAKE_SOURCE_DIR}/string_lib
-    ${CMAKE_SOURCE_DIR}/timer_lib
 )

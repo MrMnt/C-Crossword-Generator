@@ -6,7 +6,6 @@
 // https://stackoverflow.com/questions/3016526/how-to-hide-helper-functions-from-public-api-in-c
 #include "m_helper.c"
 #include "crossword.h"
-#include "m_timer.c"
 
 
 
@@ -29,35 +28,10 @@ static int findAllPossibleStartingPositions(Matrix *mt, int **stRows, int **stCo
 
 
 
-#define SHOW_PROGRESS 
-
-#ifdef SHOW_PROGRESS
-#define NUMBER_OF_CALLS_BEOFRE_SHOW_PROGRESS 1000000
-static void showProgress(Matrix *mt);
-
-long int CALL_COUNT = 0;
-Timer *mTimer;
-static void printCount(Matrix *mt){
-    if(CALL_COUNT++ % NUMBER_OF_CALLS_BEOFRE_SHOW_PROGRESS == 0){
-        setEndTime(mTimer);
-
-        printf("-------------------------------\n");
-        printf("%lf s for %d calls\n", getDuration(mTimer), NUMBER_OF_CALLS_BEOFRE_SHOW_PROGRESS);
-        printf("Total number of calls to solveCrossword() = %g\n", (double) CALL_COUNT);
-        printMatrixPretty(mt);
-
-        setStartTime(mTimer);
-    }
-}
-#endif
-
 int fillCrossword(Crossword *cw){
     int *stRows, *stCols;
     int startingPosArrLen = findAllPossibleStartingPositions(cw->matrix, &stRows, &stCols);
 
-#ifdef SHOW_PROGRESS
-    mTimer = getTimer();
-#endif
     int solved = solveCrossword(cw->dictionary, cw->matrix, 0, stRows, stCols, startingPosArrLen);
 
     free(stRows);
@@ -399,10 +373,6 @@ static int findAllPossibleStartingPositions(Matrix *mt, int **stRows, int **stCo
 
 
 static int solveCrossword(Dictionary *d, Matrix *mt, int wordIndex, int *stRows, int *stCols, int startingPosLen){
-    #ifdef SHOW_PROGRESS
-        printCount(mt);
-    #endif
-
     if(isFilled(mt))
         return TRUE;
 

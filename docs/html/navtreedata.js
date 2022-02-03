@@ -28,15 +28,16 @@ var NAVTREE =
     [ "Main Page", "index.html", [
       [ "Project Info", "index.html#main_page_s1", null ]
     ] ],
-    [ "Getting Started Guide", "md_doc_pages__getting__started.html", [
-      [ "Crossword Initialization", "md_doc_pages__getting__started.html#getting_started_s1", null ],
-      [ "Crossword generation", "md_doc_pages__getting__started.html#getting_started_s4", null ],
-      [ "Printing Crossword", "md_doc_pages__getting__started.html#getting_started_s5", null ],
-      [ "Printing Dictionary", "md_doc_pages__getting__started.html#getting_started_s6", null ],
-      [ "Printing Matrix", "md_doc_pages__getting__started.html#getting_started_s7", null ],
-      [ "Deallocating memory", "md_doc_pages__getting__started.html#getting_started_s8", null ],
-      [ "Dictionary file requirments", "md_doc_pages__getting__started.html#getting_started_s2", null ],
-      [ "Matrix file requirments", "md_doc_pages__getting__started.html#getting_started_s3", null ]
+    [ "Getting Started Guide", "md_docs_doc_pages__getting__started.html", [
+      [ "Includes", "md_docs_doc_pages__getting__started.html#getting_started_s0", null ],
+      [ "Crossword Initialization", "md_docs_doc_pages__getting__started.html#getting_started_s1", null ],
+      [ "Crossword generation", "md_docs_doc_pages__getting__started.html#getting_started_s4", null ],
+      [ "Printing Crossword", "md_docs_doc_pages__getting__started.html#getting_started_s5", null ],
+      [ "Printing Dictionary", "md_docs_doc_pages__getting__started.html#getting_started_s6", null ],
+      [ "Printing Matrix", "md_docs_doc_pages__getting__started.html#getting_started_s7", null ],
+      [ "Deallocating memory", "md_docs_doc_pages__getting__started.html#getting_started_s8", null ],
+      [ "Dictionary file requirments", "md_docs_doc_pages__getting__started.html#getting_started_s2", null ],
+      [ "Matrix file requirments", "md_docs_doc_pages__getting__started.html#getting_started_s3", null ]
     ] ],
     [ "Data Structures", "annotated.html", [
       [ "Data Structures", "annotated.html", "annotated_dup" ],

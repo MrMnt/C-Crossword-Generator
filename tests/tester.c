@@ -15,7 +15,7 @@ int main(){
 
     // test_1();
     // test_2();
-    // test_3();
+    test_3();
     // test_4(); // Arranged for BEST scenario
 
     return 0;

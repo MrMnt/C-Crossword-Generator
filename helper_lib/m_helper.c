@@ -30,7 +30,6 @@ static FILE *openFile(char *fileName, char *mode){
 static int getFileLineCountTillEmptyLine(FILE *fp){
     int prevPos = ftell(fp);
     int count = 0;
-    char c;
     
     char *str = fgetLine(fp);
     while(strlen(str) != 0){
