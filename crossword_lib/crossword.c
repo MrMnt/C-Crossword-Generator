@@ -11,20 +11,22 @@
 
 // Helper methods for solving purposes. 
 static int solveCrossword(Dictionary *d, Matrix *mt, int wordIndex, int *stRows, int *stCols, int startingPosLen);
-
+static int findAllPossibleStartingPositions(Matrix *mt, int **stRows, int **stCols);
 static int isFilled(Matrix *mt);
+
 static Matrix *createBackupMatrix(Matrix *mt);
 static void loadBackupMatrix(Matrix *mt, Matrix *backupMatrix);
-static void putWordHorizontally(String word, Matrix *mt, int row, int col);
-static void putWordVertically(String word, Matrix *mt, int row, int col);
-static int isLeftCellOccupied(Matrix *mt, int row, int col);
-static int isTopCellOccupied(Matrix *mt, int row, int col);
-static int isRightCellOccupied(String word, Matrix *mt, int row, int col);
-static int isBottomCellOccupied(String word, Matrix *mt, int row, int col);
-static int isOkayToAssignCell(char newValue, Matrix *mt, int row, int col);
+
 static int wordCanBePlacedVertically(String word, Matrix *mt, int row, int col);
 static int wordCanBePlacedHorizontally(String word, Matrix *mt, int row, int col);
-static int findAllPossibleStartingPositions(Matrix *mt, int **stRows, int **stCols);
+static void putWordHorizontally(String word, Matrix *mt, int row, int col);
+static void putWordVertically(String word, Matrix *mt, int row, int col);
+
+static int isLeftCellOccupied(Matrix *mt, int row, int col);
+static int isTopCellOccupied(Matrix *mt, int row, int col);
+static int isRightCellOccupied(String word, Matrix *mt, int row, int col); 
+static int isBottomCellOccupied(String word, Matrix *mt, int row, int col); 
+static int isOkayToAssignCell(char newValue, Matrix *mt, int row, int col);
 
 
 
