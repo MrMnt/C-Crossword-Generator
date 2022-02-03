@@ -30,17 +30,89 @@ static int isOkayToAssignCell(char newValue, Matrix *mt, int row, int col);
 
 
 
-int fillCrossword(Crossword *cw){
-    int *stRows, *stCols;
-    int startingPosArrLen = findAllPossibleStartingPositions(cw->matrix, &stRows, &stCols);
+/** Solves the crossword with recursive backtracking
+ * 
+ * If there are no more empty spaces, it means we solved the board, 
+ *   return true
+ * 
+ * For every word in the dictionary
+ * Try to find a starting position where the word could fit (horizontally or vertically)
+ *   If the word can be put in that cell, put it, and 
+ *     Start the rucursion (make sure the same words can't be used again)
+ *     If recursion is successful, return true
+ *     If recursion is NOT successful, remove the change and try other solutions
+ * If all the words have been tried and nothing worked, return false to trigger backtracking
+ * 
+ */
+static int solveCrossword(Dictionary *d, Matrix *mt, int wordIndex, int *stRows, int *stCols, int startingPosLen){
+    if(isFilled(mt))
+        return TRUE;
 
-    int solved = solveCrossword(cw->dictionary, cw->matrix, 0, stRows, stCols, startingPosArrLen);
+    Matrix *backupMatrix = createBackupMatrix(mt);
+    for(int i = wordIndex; i < d->len; ++i){
+        String word = d->wordArr[i];
 
-    free(stRows);
-    free(stCols);
+        // For every (potential) possible starting location
+        // Try solving it
+        for(int pos = 0; pos < startingPosLen; ++pos){
+            int row = stRows[pos];
+            int col = stCols[pos];
+            
+            // ----------------- HORIZONTAL --------------------
+            if(wordCanBePlacedHorizontally(word, mt, row, col)){
+                putWordHorizontally(word, mt, row, col);
+                if(solveCrossword(d, mt, i + 1, stRows, stCols, startingPosLen) == TRUE){
+                    return TRUE;
+                } else {
+                    loadBackupMatrix(mt, backupMatrix);
+                }
+            }
 
-    return solved;
+            // ----------------- VERTICAL --------------------
+            if(wordCanBePlacedVertically(word, mt, row, col)){
+                putWordVertically(word, mt, row, col);
+                if(solveCrossword(d, mt, i + 1, stRows, stCols, startingPosLen) == TRUE){
+                    return TRUE;
+                } else {
+                    loadBackupMatrix(mt, backupMatrix);
+                }
+            }
+        }
+
+    }
+
+    freeMatrix(backupMatrix);
+    return FALSE;
 }
+
+// Once we have the starting positions, we don't need to loop through n*m matrix everytime. 
+static int findAllPossibleStartingPositions(Matrix *mt, int **stRows, int **stCols){
+    *stRows = malloc(sizeof(int) * mt->height * mt->width);
+    *stCols = malloc(sizeof(int) * mt->height * mt->width);
+    int startingPosArrLen = 0;
+
+    for(int row = 0; row < mt->height; ++row){
+        for(int col = 0; col < mt->width; ++col){
+            if(!isOkayToAssignCell(' ', mt, row, col))
+                continue;
+
+            // if word COULD start here
+            if(isLeftCellOccupied(mt, row, col) || isTopCellOccupied(mt, row, col)){
+                (*stRows)[startingPosArrLen] = row;
+                (*stCols)[startingPosArrLen] = col;
+                startingPosArrLen += 1;
+            }
+
+        }
+    }
+
+    *stRows = realloc(*stRows, sizeof(int) * startingPosArrLen);
+    *stCols = realloc(*stCols, sizeof(int) * startingPosArrLen);
+
+    return startingPosArrLen;
+}
+
+
 
 Crossword *createCrossword(char *dictionaryFileName, char *matrixFileName){
     Crossword *cw = calloc(1, sizeof(Crossword));
@@ -55,23 +127,6 @@ Crossword *createCrossword(char *dictionaryFileName, char *matrixFileName){
 
     return cw;
 }
-
-void setDictionary(Crossword *cw, Dictionary *d){
-    if(cw->dictionary != NULL){
-        freeDictionary(cw->dictionary);
-    }
-
-    cw->dictionary = d;
-}
-
-void setMatrix(Crossword *cw, Matrix *mt){
-    if(cw->matrix != NULL){
-        freeMatrix(cw->matrix);
-    }
-    
-    cw->matrix = mt;
-}
-
 
 Dictionary *createDictionaryFromFile(char * dictionaryFileName){
     if(dictionaryFileName == NULL)
@@ -91,28 +146,6 @@ Dictionary *createDictionaryFromFile(char * dictionaryFileName){
 
     fclose(dfp);
     return d;
-}
-
-Dictionary *createDictionary(char **words, int dlen){
-    Dictionary *d = malloc(sizeof(Dictionary));
-
-    d->len = dlen;
-    d->wordArr = malloc(d->len * sizeof(String));
-
-    for(int i = 0; i < d->len; ++i){
-        String *tmpStr = createString(words[i]);
-        d->wordArr[i] = *tmpStr;
-        free(tmpStr);
-    }
-
-    return d;
-}
-
-void printDictionary(Dictionary *d){
-    for(int i = 0; i < d->len; ++i){
-        puts(d->wordArr[i].s);
-    }
-    putchar('\n');
 }
 
 Matrix *createMatrixFromFile(char *matrixFileName){
@@ -135,6 +168,23 @@ Matrix *createMatrixFromFile(char *matrixFileName){
     return mt;
 }
 
+
+
+Dictionary *createDictionary(char **words, int dlen){
+    Dictionary *d = malloc(sizeof(Dictionary));
+
+    d->len = dlen;
+    d->wordArr = malloc(d->len * sizeof(String));
+
+    for(int i = 0; i < d->len; ++i){
+        String *tmpStr = createString(words[i]);
+        d->wordArr[i] = *tmpStr;
+        free(tmpStr);
+    }
+
+    return d;
+}
+
 Matrix *createMatrix(char **grid, int height, int width){
     Matrix *mt = malloc(sizeof(Matrix));
 
@@ -148,6 +198,47 @@ Matrix *createMatrix(char **grid, int height, int width){
     }
 
     return mt;
+}
+
+
+
+int fillCrossword(Crossword *cw){
+    int *stRows, *stCols;
+    int startingPosArrLen = findAllPossibleStartingPositions(cw->matrix, &stRows, &stCols);
+
+    int solved = solveCrossword(cw->dictionary, cw->matrix, 0, stRows, stCols, startingPosArrLen);
+
+    free(stRows);
+    free(stCols);
+
+    return solved;
+}
+
+
+
+void setDictionary(Crossword *cw, Dictionary *d){
+    if(cw->dictionary != NULL){
+        freeDictionary(cw->dictionary);
+    }
+
+    cw->dictionary = d;
+}
+
+void setMatrix(Crossword *cw, Matrix *mt){
+    if(cw->matrix != NULL){
+        freeMatrix(cw->matrix);
+    }
+    
+    cw->matrix = mt;
+}
+
+
+
+void printDictionary(Dictionary *d){
+    for(int i = 0; i < d->len; ++i){
+        puts(d->wordArr[i].s);
+    }
+    putchar('\n');
 }
 
 void printMatrix(Matrix *mt){
@@ -190,6 +281,15 @@ void fprintMatrixPretty(Matrix *mt, FILE *fp){
     putc('\n', fp);
 }
 
+
+
+void freeCrossword(Crossword *crossword){
+    freeDictionary(crossword->dictionary);
+    freeMatrix(crossword->matrix);
+    free(crossword);
+    crossword = NULL;
+}
+
 void freeDictionary(Dictionary *d){
     freeStringArray(d->wordArr, d->len);
     free(d);
@@ -205,12 +305,7 @@ void freeMatrix(Matrix *mt){
     mt = NULL;
 }
 
-void freeCrossword(Crossword *crossword){
-    freeDictionary(crossword->dictionary);
-    freeMatrix(crossword->matrix);
-    free(crossword);
-    crossword = NULL;
-}
+
 
 static int isFilled(Matrix *mt){
     for(int y = 0; y < mt->height; ++y)
@@ -345,72 +440,4 @@ static int wordCanBePlacedHorizontally(String word, Matrix *mt, int row, int col
     }
 
     return TRUE;
-}
-
-static int findAllPossibleStartingPositions(Matrix *mt, int **stRows, int **stCols){
-    *stRows = malloc(sizeof(int) * mt->height * mt->width);
-    *stCols = malloc(sizeof(int) * mt->height * mt->width);
-    int startingPosArrLen = 0;
-
-    for(int row = 0; row < mt->height; ++row){
-        for(int col = 0; col < mt->width; ++col){
-            if(!isOkayToAssignCell(' ', mt, row, col))
-                continue;
-
-            // if word COULD start here
-            if(isLeftCellOccupied(mt, row, col) || isTopCellOccupied(mt, row, col)){
-                (*stRows)[startingPosArrLen] = row;
-                (*stCols)[startingPosArrLen] = col;
-                startingPosArrLen += 1;
-            }
-
-        }
-    }
-
-    *stRows = realloc(*stRows, sizeof(int) * startingPosArrLen);
-    *stCols = realloc(*stCols, sizeof(int) * startingPosArrLen);
-
-    return startingPosArrLen;
-}
-
-
-static int solveCrossword(Dictionary *d, Matrix *mt, int wordIndex, int *stRows, int *stCols, int startingPosLen){
-    if(isFilled(mt))
-        return TRUE;
-
-    Matrix *backupMatrix = createBackupMatrix(mt);
-    for(int i = wordIndex; i < d->len; ++i){
-        String word = d->wordArr[i];
-
-        // For every (potential) possible starting location
-        // Try solving it
-        for(int pos = 0; pos < startingPosLen; ++pos){
-            int row = stRows[pos];
-            int col = stCols[pos];
-            
-            // ----------------- HORIZONTAL --------------------
-            if(wordCanBePlacedHorizontally(word, mt, row, col)){
-                putWordHorizontally(word, mt, row, col);
-                if(solveCrossword(d, mt, i + 1, stRows, stCols, startingPosLen) == TRUE){
-                    return TRUE;
-                } else {
-                    loadBackupMatrix(mt, backupMatrix);
-                }
-            }
-
-            // ----------------- VERTICAL --------------------
-            if(wordCanBePlacedVertically(word, mt, row, col)){
-                putWordVertically(word, mt, row, col);
-                if(solveCrossword(d, mt, i + 1, stRows, stCols, startingPosLen) == TRUE){
-                    return TRUE;
-                } else {
-                    loadBackupMatrix(mt, backupMatrix);
-                }
-            }
-        }
-
-    }
-
-    freeMatrix(backupMatrix);
-    return FALSE;
 }
