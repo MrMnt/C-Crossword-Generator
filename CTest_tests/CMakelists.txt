@@ -1,0 +1,28 @@
+# CTest_tests/CMakelists.txt
+
+# Only test if the crossword was solved correctly, beacause if so,
+# By rule, everything else must also work. 
+
+# Makes TEST.c an executable
+# Links with crossword library
+# And ads as a test.
+function(m_add_test TEST)
+    add_executable(${TEST} ${TEST}.c)
+
+    target_link_libraries(${TEST} crossword)
+    target_include_directories(${TEST} PRIVATE
+        ${CMAKE_SOURCE_DIR}/crossword_lib
+    )
+
+    add_test(${TEST} ${TEST})
+endfunction()
+
+
+set(TESTS_LIST  
+    small_test_1   small_test_2   small_test_3
+    medium_test_1  medium_test_2  medium_test_3
+)
+
+foreach(TEST ${TESTS_LIST})
+    m_add_test(${TEST})
+endforeach()

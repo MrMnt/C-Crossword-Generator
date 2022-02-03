@@ -3,7 +3,11 @@
 cmake_minimum_required(VERSION 3.22.2)
 project(crossword_generator)
 
+enable_testing()
+
+
 add_subdirectory(helper_lib)
 add_subdirectory(string_lib)
 add_subdirectory(crossword_lib)
-add_subdirectory(tests)
+
+add_subdirectory(CTest_tests)
